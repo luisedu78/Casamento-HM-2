@@ -40,7 +40,14 @@
           <label for="lgpd">Autorizo o uso dos meus dados para organização do evento (LGPD).</label>
         </div>
         <button class="button primary" type="submit" style="grid-column:1 / -1; width:fit-content;">Enviar confirmação</button>
+      
+        <div id="rsvp-actions" class="card" style="margin-top:12px; padding:12px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" id="btn-whatsapp" class="button">Enviar por WhatsApp</button>
+          <button type="button" id="btn-forms" class="button outline">Enviar pelo Formulário</button>
+          <p id="rsvp-hint" class="subtitle" style="margin:0 0 0 10px; opacity:.75;">Preencha os campos acima e escolha uma opção.</p>
+        </div>
       </form>
+        
       <p id="rsvp-ok" style="display:none; margin-top:16px;" class="subtitle">Obrigado! Sua resposta foi registrada.</p>
     </div>
   </main>
@@ -66,52 +73,64 @@
   </div>
 
 
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.emailjs.com/sdk/3.11.0/email.min.js"></script>
-  <script>
-    (function(){
-      emailjs.init("OwiROCEjHB-aSxoZw");
-    })();
-  </script>
-
-
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   const form = document.getElementById('rsvp-form');
-  if(!form) return;
-  const ok = document.getElementById('rsvp-ok');
-  const wbox = document.getElementById('whats-ok');
-  const wlink = document.getElementById('whats-link');
+  const btnW = document.getElementById('btn-whatsapp');
+  const btnF = document.getElementById('btn-forms');
 
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    const data = {
-      nome: (form.querySelector('[name="nome"]')||{}).value || '',
-      email: (form.querySelector('[name="email"]')||{}).value || '',
-      telefone: (form.querySelector('[name="telefone"]')||{}).value || '',
-      qtd: (form.querySelector('[name="qtd"]')||{}).value || '',
-      presenca: (form.querySelector('[name="presenca"]')||{}).value || '',
-      msg: (form.querySelector('[name="msg"]')||{}).value || ''
-    };
+  async function loadCfg(){
+    try{
+      const res = await fetch('assets/site.config.json', {cache:'no-store'});
+      if(!res.ok) return null;
+      return await res.json();
+    }catch(e){ return null; }
+  }
 
-    emailjs.send("service_e9inkqh", "template_4gx4dy9", data)
-      .then(function(){ 
-        if(ok) ok.style.display = 'block';
-        if (data.presenca === 'Sim' && wbox && wlink) {
-          const texto = encodeURIComponent(
-            `Olá, sou ${data.nome}! 💍🎉\n` +
-            `Estou confirmando minha presença para ${data.qtd} pessoa(s) no casamento da Marília e do Huesley.\n\n` +
-            `Mensagem: ${data.msg || '—'}`
-          );
-          wlink.href = "https://wa.me/5541998022655?text=" + texto;
-          wbox.style.display = 'block';
-        }
-        form.reset();
-      })
-      .catch(function(err){ 
-        alert("Erro ao enviar: " + (err && err.text ? err.text : JSON.stringify(err))); 
-      });
-  });
+  function getVal(name){
+    const el = form.querySelector(`[name="${name}"]`);
+    return el ? (el.value || '') : '';
+  }
+
+  function buildMessage(){
+    const nome = getVal('nome');
+    const qtd = getVal('qtd') || '1';
+    const presenca = getVal('presenca');
+    const msg = getVal('msg');
+    const partes = [];
+    partes.push(`Olá, sou ${nome}! 💍🎉`);
+    if(presenca) partes.push(`Resposta: ${presenca}`);
+    partes.push(`Quantidade de pessoas: ${qtd}`);
+    if(msg) partes.push(`Mensagem: ${msg}`);
+    return partes.join('\n');
+  }
+
+  if(btnW){
+    btnW.addEventListener('click', async ()=>{
+      if(!form) return;
+      const cfg = await loadCfg();
+      const phone = (cfg && cfg.coupleWhatsapp || '').replace(/[^\d]/g,'');
+      if(!phone){
+        alert('O número de WhatsApp ainda não foi configurado.');
+        return;
+      }
+      const texto = encodeURIComponent(buildMessage());
+      window.open(`https://wa.me/${phone}?text=${texto}`, '_blank');
+    });
+  }
+
+  if(btnF){
+    btnF.addEventListener('click', async ()=>{
+      const cfg = await loadCfg();
+      const url = cfg && cfg.formsUrl;
+      if(!url){
+        alert('O link do Google Forms ainda não foi configurado.');
+        return;
+      }
+      // Abre o Forms pré-preenchido (pp_url). Para avançar: podemos também montar parametros entry.xxxx aqui.
+      window.open(url, '_blank');
+    });
+  }
 });
 </script>
 

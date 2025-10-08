@@ -302,7 +302,8 @@ nav .brand { display:flex; gap:10px; align-items:center; font-weight:700; letter
 .home-intro p{ margin: 8px 0; }
 
 
-/* RSVP emailjs tweaks */
+/* RSVP actions responsive */
 @media (max-width: 720px){
-  #whats-ok .button{ width: 100%; }
+  #rsvp-actions { flex-direction: column; }
+  #rsvp-actions .button { width: 100%; }
 }
