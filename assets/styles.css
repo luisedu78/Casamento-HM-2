@@ -306,3 +306,9 @@ nav .brand { display:flex; gap:10px; align-items:center; font-weight:700; letter
 @media (max-width: 720px){
   #rsvp-actions .button { width: 100%; }
 }
+
+
+/* Two-button RSVP (WhatsApp + Forms) */
+@media (max-width: 720px){
+  .actions .button{ width:100%; text-align:center; }
+}

@@ -22,30 +22,17 @@
   <main class="section">
     <div class="container">
       <h2>Confirme sua Presença</h2>
-      <form id="rsvp-form" class="grid" style="grid-template-columns:1fr 1fr; gap:16px; max-width:720px;">
-        <label>Nome completo<br><input name="nome" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></label>
-        <label>Vai ao casamento?<br>
-          <select name="vai" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
-            <option value="sim">Sim</option>
-            <option value="nao">Não</option>
-          </select>
-        </label>
-        <label>Adultos<br><input name="adultos" type="number" min="0" value="1" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></label>
-        <label>Crianças<br><input name="criancas" type="number" min="0" value="0" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></label>
-        <label>E-mail<br><input name="email" type="email" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></label>
-        <label>WhatsApp<br><input name="whats" type="tel" placeholder="(00) 00000-0000" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></label>
-        <label style="grid-column:1 / -1;">Observações<br><textarea name="obs" rows="4" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></textarea></label>
-        <div style="grid-column:1 / -1; display:flex; gap:12px; align-items:center;">
-          <input id="lgpd" type="checkbox" required>
-          <label for="lgpd">Autorizo o uso dos meus dados para organização do evento (LGPD).</label>
-        </div>
-        <button class="button primary" type="submit" style="grid-column:1 / -1; width:fit-content;">Enviar confirmação</button>
       
-        <div id="rsvp-actions" class="card" style="margin-top:12px; padding:12px; display:flex; gap:10px; flex-wrap:wrap;">
-          <button type="button" id="btn-whatsapp" class="button" style="background:#25D366;border-color:#25D366">Confirmar pelo WhatsApp</button>
-          <p id="rsvp-hint" class="subtitle" style="margin:0; opacity:.75;">O envio registra silenciosamente no formulário e abre o WhatsApp.</p>
-        </div>
-      </form>
+    <section class="card" style="padding:20px; text-align:center;">
+      <h2 class="title" style="margin-top:0">Confirmação de Presença</h2>
+      <p class="subtitle">Escolha uma opção abaixo:</p>
+      <div class="actions" style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <a id="btn-whats" class="button" style="background:#25D366;border-color:#25D366; color:#fff; padding:12px 18px; border-radius:999px; text-decoration:none;" href="#" target="_blank" rel="noopener">Confirmar pelo WhatsApp</a>
+        <a id="btn-forms" class="button outline" style="padding:12px 18px; border-radius:999px; text-decoration:none;" href="#" target="_blank" rel="noopener">Abrir Formulário</a>
+      </div>
+      <p class="subtitle" style="margin-top:10px; opacity:.75;">O WhatsApp abre com uma mensagem modelo para você completar e enviar.</p>
+    </section>
+    
         
       <p id="rsvp-ok" style="display:none; margin-top:16px;" class="subtitle">Obrigado! Sua resposta foi registrada.</p>
     </div>
@@ -72,70 +59,18 @@
   </div>
 
 
+
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  const form = document.getElementById('rsvp-form');
-  const btnW = document.getElementById('btn-whatsapp');
-  const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfM0wf2ZkxSMrnpFeMuejjVMBMaJNGZzZxwn5GfnhHKHS3C5A/formResponse";
-  const WHATS = "5541998022655";
-  const ENTRY = {
-    nome: "entry.1613779454",
-    presenca: "entry.218794958",
-    adultos: "entry.58451838",
-    criancas: "entry.117818860",
-    email: "entry.1056036298",
-    telefone: "entry.1722004759",
-    msg: "entry.1437778774"
-  };
-
-  function getVal(name){
-    const el = form ? form.querySelector(`[name="${name}"]`) : null;
-    return el ? (el.value || '') : '';
+  var btnWhats = document.getElementById('btn-whats');
+  var btnForms = document.getElementById('btn-forms');
+  if (btnWhats) {
+    btnWhats.href = "https://wa.me/5541998022655?text=Ol%C3%A1%21%20Quero%20confirmar%20presen%C3%A7a%20no%20casamento%20da%20Mar%C3%ADlia%20e%20do%20Huesley.%20%F0%9F%92%8D%F0%9F%8E%89%0ANome%3A%20%0APresen%C3%A7a%20%28Sim%2FN%C3%A3o%29%3A%20%0AAdultos%3A%20%0ACrian%C3%A7as%3A%20%0AE-mail%3A%20%0ATelefone%3A%20%0AMensagem%3A%20";
   }
-  function toInt(v, d){ const n = parseInt(v, 10); return isNaN(n) ? (d||0) : n; }
-  function buildWhatsText(){
-    const nome = getVal('nome');
-    const email = getVal('email');
-    const tel = getVal('telefone');
-    const presenca = getVal('presenca');
-    const adultos = toInt(getVal('adultos'), 0);
-    const criancas = toInt(getVal('criancas'), 0);
-    const total = adultos + criancas;
-    const msg = getVal('msg');
-    const lines = [];
-    lines.push(`Olá, sou ${nome}! 💍🎉`);
-    lines.push(`Resposta: ${presenca||'-'}`);
-    lines.push(`👤 Adultos: ${adultos} | 👶 Crianças: ${criancas} | 👥 Total: ${total}`);
-    lines.push(`📧 E-mail: ${email||'-'}`);
-    lines.push(`📞 Telefone: ${tel||'-'}`);
-    if (msg) lines.push(`💬 Mensagem: ${msg}`);
-    return encodeURIComponent(lines.join('\n'));
-  }
-  async function sendToFormsSilently(){
-    const payload = new URLSearchParams();
-    payload.append(ENTRY.nome, getVal('nome'));
-    payload.append(ENTRY.presenca, getVal('presenca'));
-    payload.append(ENTRY.adultos, getVal('adultos'));
-    payload.append(ENTRY.criancas, getVal('criancas'));
-    payload.append(ENTRY.email, getVal('email'));
-    payload.append(ENTRY.telefone, getVal('telefone'));
-    payload.append(ENTRY.msg, getVal('msg'));
-    try {
-      await fetch(FORM_ACTION, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: payload });
-    } catch(e) { console.warn('Falha no envio silencioso ao Forms (ok em no-cors):', e); }
-  }
-  if (btnW){
-    btnW.addEventListener('click', async () => {
-      if (!form) return;
-      if (!getVal('nome') || !getVal('presenca')) { alert('Preencha pelo menos Nome e Presença.'); return; }
-      await sendToFormsSilently();
-      const texto = buildWhatsText();
-      if (!WHATS) return alert('Número de WhatsApp não configurado.');
-      window.open(`https://wa.me/${WHATS}?text=${texto}`, '_blank');
-      const ok = document.getElementById('rsvp-ok');
-      if (ok) ok.style.display = 'block';
-      form.reset();
-    });
+  if (btnForms) {
+    btnForms.href = "https://docs.google.com/forms/d/e/1FAIpQLSfM0wf2ZkxSMrnpFeMuejjVMBMaJNGZzZxwn5GfnhHKHS3C5A/viewform?usp=pp_url";
   }
 });
 </script>
