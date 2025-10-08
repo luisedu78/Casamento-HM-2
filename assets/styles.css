@@ -251,3 +251,58 @@ nav .brand { display:flex; gap:10px; align-items:center; font-weight:700; letter
   .countdown-card{min-width:auto; width:100%}
   .container{padding-left:14px; padding-right:14px}
 }
+
+
+/* === Fix: stack Waze & Google Maps buttons on mobile === */
+@media (max-width: 720px){
+  .location-buttons, .ceremony-buttons, .map-buttons, .buttons-container {
+    display: flex;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .location-buttons .button, .ceremony-buttons .button, 
+  .map-buttons .button, .buttons-container .button {
+    width: 100%;
+    margin: 0 !important;
+  }
+}
+
+
+/* === Fix: stack hero CTA buttons on mobile (Home) === */
+@media (max-width: 720px){
+  .hero .cta-buttons,
+  .hero .buttons,
+  .hero .actions {
+    display: flex;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hero .button {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  .hero .button + .button {
+    margin-top: 10px !important;
+  }
+}
+
+
+/* === Home intro text styling (consolidated) === */
+.home-intro{
+  max-width: 780px;
+  padding: 12px 14px;
+  text-align: center;
+  color: var(--text);
+  line-height: 1.55;
+  margin: 4px auto 8px;
+}
+.home-intro p{ margin: 8px 0; }
+
+
+/* RSVP emailjs tweaks */
+@media (max-width: 720px){
+  #whats-ok .button{ width: 100%; }
+}
