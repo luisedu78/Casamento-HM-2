@@ -302,8 +302,7 @@ nav .brand { display:flex; gap:10px; align-items:center; font-weight:700; letter
 .home-intro p{ margin: 8px 0; }
 
 
-/* RSVP actions responsive */
+/* RSVP WhatsApp-only button responsive */
 @media (max-width: 720px){
-  #rsvp-actions { flex-direction: column; }
   #rsvp-actions .button { width: 100%; }
 }

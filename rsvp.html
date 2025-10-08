@@ -42,9 +42,8 @@
         <button class="button primary" type="submit" style="grid-column:1 / -1; width:fit-content;">Enviar confirmação</button>
       
         <div id="rsvp-actions" class="card" style="margin-top:12px; padding:12px; display:flex; gap:10px; flex-wrap:wrap;">
-          <button type="button" id="btn-whatsapp" class="button">Enviar por WhatsApp</button>
-          <button type="button" id="btn-forms" class="button outline">Enviar pelo Formulário</button>
-          <p id="rsvp-hint" class="subtitle" style="margin:0 0 0 10px; opacity:.75;">Preencha os campos acima e escolha uma opção.</p>
+          <button type="button" id="btn-whatsapp" class="button" style="background:#25D366;border-color:#25D366">Confirmar pelo WhatsApp</button>
+          <p id="rsvp-hint" class="subtitle" style="margin:0; opacity:.75;">O envio registra silenciosamente no formulário e abre o WhatsApp.</p>
         </div>
       </form>
         
@@ -77,58 +76,65 @@
 document.addEventListener('DOMContentLoaded', function(){
   const form = document.getElementById('rsvp-form');
   const btnW = document.getElementById('btn-whatsapp');
-  const btnF = document.getElementById('btn-forms');
-
-  async function loadCfg(){
-    try{
-      const res = await fetch('assets/site.config.json', {cache:'no-store'});
-      if(!res.ok) return null;
-      return await res.json();
-    }catch(e){ return null; }
-  }
+  const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfM0wf2ZkxSMrnpFeMuejjVMBMaJNGZzZxwn5GfnhHKHS3C5A/formResponse";
+  const WHATS = "5541998022655";
+  const ENTRY = {
+    nome: "entry.1613779454",
+    presenca: "entry.218794958",
+    adultos: "entry.58451838",
+    criancas: "entry.117818860",
+    email: "entry.1056036298",
+    telefone: "entry.1722004759",
+    msg: "entry.1437778774"
+  };
 
   function getVal(name){
-    const el = form.querySelector(`[name="${name}"]`);
+    const el = form ? form.querySelector(`[name="${name}"]`) : null;
     return el ? (el.value || '') : '';
   }
-
-  function buildMessage(){
+  function toInt(v, d){ const n = parseInt(v, 10); return isNaN(n) ? (d||0) : n; }
+  function buildWhatsText(){
     const nome = getVal('nome');
-    const qtd = getVal('qtd') || '1';
+    const email = getVal('email');
+    const tel = getVal('telefone');
     const presenca = getVal('presenca');
+    const adultos = toInt(getVal('adultos'), 0);
+    const criancas = toInt(getVal('criancas'), 0);
+    const total = adultos + criancas;
     const msg = getVal('msg');
-    const partes = [];
-    partes.push(`Olá, sou ${nome}! 💍🎉`);
-    if(presenca) partes.push(`Resposta: ${presenca}`);
-    partes.push(`Quantidade de pessoas: ${qtd}`);
-    if(msg) partes.push(`Mensagem: ${msg}`);
-    return partes.join('\n');
+    const lines = [];
+    lines.push(`Olá, sou ${nome}! 💍🎉`);
+    lines.push(`Resposta: ${presenca||'-'}`);
+    lines.push(`👤 Adultos: ${adultos} | 👶 Crianças: ${criancas} | 👥 Total: ${total}`);
+    lines.push(`📧 E-mail: ${email||'-'}`);
+    lines.push(`📞 Telefone: ${tel||'-'}`);
+    if (msg) lines.push(`💬 Mensagem: ${msg}`);
+    return encodeURIComponent(lines.join('\n'));
   }
-
-  if(btnW){
-    btnW.addEventListener('click', async ()=>{
-      if(!form) return;
-      const cfg = await loadCfg();
-      const phone = (cfg && cfg.coupleWhatsapp || '').replace(/[^\d]/g,'');
-      if(!phone){
-        alert('O número de WhatsApp ainda não foi configurado.');
-        return;
-      }
-      const texto = encodeURIComponent(buildMessage());
-      window.open(`https://wa.me/${phone}?text=${texto}`, '_blank');
-    });
+  async function sendToFormsSilently(){
+    const payload = new URLSearchParams();
+    payload.append(ENTRY.nome, getVal('nome'));
+    payload.append(ENTRY.presenca, getVal('presenca'));
+    payload.append(ENTRY.adultos, getVal('adultos'));
+    payload.append(ENTRY.criancas, getVal('criancas'));
+    payload.append(ENTRY.email, getVal('email'));
+    payload.append(ENTRY.telefone, getVal('telefone'));
+    payload.append(ENTRY.msg, getVal('msg'));
+    try {
+      await fetch(FORM_ACTION, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: payload });
+    } catch(e) { console.warn('Falha no envio silencioso ao Forms (ok em no-cors):', e); }
   }
-
-  if(btnF){
-    btnF.addEventListener('click', async ()=>{
-      const cfg = await loadCfg();
-      const url = cfg && cfg.formsUrl;
-      if(!url){
-        alert('O link do Google Forms ainda não foi configurado.');
-        return;
-      }
-      // Abre o Forms pré-preenchido (pp_url). Para avançar: podemos também montar parametros entry.xxxx aqui.
-      window.open(url, '_blank');
+  if (btnW){
+    btnW.addEventListener('click', async () => {
+      if (!form) return;
+      if (!getVal('nome') || !getVal('presenca')) { alert('Preencha pelo menos Nome e Presença.'); return; }
+      await sendToFormsSilently();
+      const texto = buildWhatsText();
+      if (!WHATS) return alert('Número de WhatsApp não configurado.');
+      window.open(`https://wa.me/${WHATS}?text=${texto}`, '_blank');
+      const ok = document.getElementById('rsvp-ok');
+      if (ok) ok.style.display = 'block';
+      form.reset();
     });
   }
 });
